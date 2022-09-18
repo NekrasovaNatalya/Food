@@ -442,4 +442,8 @@ window.addEventListener('DOMContentLoaded', () => {
             dots[slideIndex - 1].style.opacity = 1;
         });
     });
+    
+    function deleteNotDigits(str) {
+        return +str.replace(/\D/g, '');
+    }
 });
