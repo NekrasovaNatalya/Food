@@ -397,4 +397,29 @@ window.addEventListener('DOMContentLoaded', () => {
         dots.forEach(dot => dot.style.opacity = ".5");
         dots[slideIndex - 1].style.opacity = 1;
     });
+    
+    prev.addEventListener('click', () => {
+        if (offset == 0) {
+            offset = deleteNotDigits(width) * (slides.length - 1);
+        } else {
+            offset -= deleteNotDigits(width);
+        }
+
+        slidesField.style.transform = `translateX(-${offset}px)`;
+
+        if (slideIndex == 1) {
+            slideIndex = slides.length;
+        } else {
+            slideIndex--;
+        }
+
+        if (slides.length < 10) {
+            current.textContent = `0${slideIndex}`;
+        } else {
+            current.textContent = slideIndex;
+        }
+
+        dots.forEach(dot => dot.style.opacity = ".5");
+        dots[slideIndex - 1].style.opacity = 1;
+    });
 });
