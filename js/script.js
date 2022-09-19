@@ -1,21 +1,20 @@
-'use strict'
+window.addEventListener('DOMContentLoaded', function () {
 
-window.addEventListener('DOMContentLoaded', () => {
+    // Tabs
 
-    //tabs
-
-    const tabs = document.querySelectorAll('.tabheader__item'),
+    let tabs = document.querySelectorAll('.tabheader__item'),
         tabsContent = document.querySelectorAll('.tabcontent'),
         tabsParent = document.querySelector('.tabheader__items');
 
     function hideTabContent() {
+
         tabsContent.forEach(item => {
             item.classList.add('hide');
             item.classList.remove('show', 'fade');
         });
 
-        tabs.forEach(tab => {
-            tab.classList.remove('tabheader__item_active');
+        tabs.forEach(item => {
+            item.classList.remove('tabheader__item_active');
         });
     }
 
@@ -28,9 +27,8 @@ window.addEventListener('DOMContentLoaded', () => {
     hideTabContent();
     showTabContent();
 
-    tabsParent.addEventListener('click', (event) => {
+    tabsParent.addEventListener('click', function (event) {
         const target = event.target;
-
         if (target && target.classList.contains('tabheader__item')) {
             tabs.forEach((item, i) => {
                 if (target == item) {
@@ -40,20 +38,20 @@ window.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
-    
-    //timer
 
-    const deadline = '2022-09-20';
+    // Timer
+
+    const deadline = '2022-10-20';
 
     function getTimeRemaining(endtime) {
-        const d = Date.parse(endtime) - Date.parse(new Date()),
-              days = Math.floor(d / (1000 * 60 * 60 * 24)),
-              hours = Math.floor((d / (1000 * 60 * 60) % 24)),
-              minutes = Math.floor((d / (1000 * 60) % 60)),
-              seconds = Math.floor((d / 1000) % 60);
+        const t = Date.parse(endtime) - Date.parse(new Date()),
+            days = Math.floor((t / (1000 * 60 * 60 * 24))),
+            seconds = Math.floor((t / 1000) % 60),
+            minutes = Math.floor((t / 1000 / 60) % 60),
+            hours = Math.floor((t / (1000 * 60 * 60) % 24));
 
         return {
-            'total': d,
+            'total': t,
             'days': days,
             'hours': hours,
             'minutes': minutes,
@@ -63,19 +61,20 @@ window.addEventListener('DOMContentLoaded', () => {
 
     function getZero(num) {
         if (num >= 0 && num < 10) {
-            return `0${num}`;
+            return '0' + num;
         } else {
             return num;
         }
     }
 
     function setClock(selector, endtime) {
+
         const timer = document.querySelector(selector),
-              days = timer.querySelector('#days'),
-              hours = timer.querySelector('#hours'),
-              minutes = timer.querySelector('#minutes'),
-              seconds = timer.querySelector('#seconds'),
-              timeInterval = setInterval(updateClock, 1000);
+            days = timer.querySelector("#days"),
+            hours = timer.querySelector('#hours'),
+            minutes = timer.querySelector('#minutes'),
+            seconds = timer.querySelector('#seconds'),
+            timeInterval = setInterval(updateClock, 1000);
 
         updateClock();
 
@@ -94,78 +93,83 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     setClock('.timer', deadline);
-    
-    //modal window
 
-    const modalBtn = document.querySelectorAll('[data-modal]'),
-          modalClose = document.querySelector('[data-close]'),
-          modal = document.querySelector('.modal');
+    // Modal
 
-    modalBtn.forEach(btn => {
+    const modalTrigger = document.querySelectorAll('[data-modal]'),
+        modal = document.querySelector('.modal');
+
+    modalTrigger.forEach(btn => {
         btn.addEventListener('click', openModal);
     });
-    
-    function openModal() {
-        modal.classList.add('show');
-        modal.classList.remove('hide');
-        document.body.style.overflow = 'hidden';
-        clearInterval(modalTimer);
-    }
 
-    function closeModalWindow() {
+    function closeModal() {
         modal.classList.add('hide');
         modal.classList.remove('show');
         document.body.style.overflow = '';
     }
 
-    modalClose.addEventListener('click', closeModalWindow);
+    function openModal() {
+        modal.classList.add('show');
+        modal.classList.remove('hide');
+        document.body.style.overflow = 'hidden';
+        clearInterval(modalTimerId);
+    }
 
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModalWindow();
+        if (e.target === modal || e.target.getAttribute('data-close') == "") {
+            closeModal();
         }
     });
 
     document.addEventListener('keydown', (e) => {
         if (e.code === "Escape" && modal.classList.contains('show')) {
-            closeModalWindow();
+            closeModal();
         }
     });
 
-    const modalTimer = setTimeout(openModal, 10000);
-    
-      // product cards
+    const modalTimerId = setTimeout(openModal, 10000);
+
+
+    function showModalByScroll() {
+        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
+            openModal();
+            window.removeEventListener('scroll', showModalByScroll);
+        }
+    }
+    window.addEventListener('scroll', showModalByScroll);
 
     class MenuCard {
-        constructor (src, alt, title, text, price, parentSelector, ...classes) {
+        constructor(src, alt, title, descr, price, parentSelector, ...classes) {
             this.src = src;
             this.alt = alt;
             this.title = title;
-            this.text = text;
+            this.descr = descr;
             this.price = price;
-            this.classes = classes,
+            this.classes = classes;
             this.parent = document.querySelector(parentSelector);
             this.transfer = 83;
-            this.changeToRub();
+            this.changeToUAH();
         }
 
-        changeToRub () {
+        changeToUAH() {
             this.price = this.price * this.transfer;
         }
 
-        render () {
+        render() {
             const element = document.createElement('div');
+
             if (this.classes.length === 0) {
-                this.element = 'menu__item';
-                element.classList.add(this.element);
+                this.classes = "menu__item";
+                element.classList.add(this.classes);
             } else {
                 this.classes.forEach(className => element.classList.add(className));
             }
-            
+
             element.innerHTML = `
                 <img src=${this.src} alt=${this.alt}>
                 <h3 class="menu__item-subtitle">${this.title}</h3>
-                <div class="menu__item-descr">${this.text}</div>
+                <div class="menu__item-descr">${this.descr}</div>
                 <div class="menu__item-divider"></div>
                 <div class="menu__item-price">
                     <div class="menu__item-cost">Цена:</div>
@@ -176,10 +180,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // const div = new ProductCard();
-    // div.render();
-
-    new ProductCard(
+    new MenuCard(
         "img/tabs/vegy.jpg",
         "vegy",
         'Меню "Фитнес"',
@@ -189,7 +190,7 @@ window.addEventListener('DOMContentLoaded', () => {
         'menu__item'
     ).render();
 
-    new ProductCard(
+    new MenuCard(
         "img/tabs/elite.jpg",
         "elite",
         'Меню "Премиум"',
@@ -199,7 +200,7 @@ window.addEventListener('DOMContentLoaded', () => {
         'menu__item'
     ).render();
 
-    new ProductCard(
+    new MenuCard(
         "img/tabs/post.jpg",
         "post",
         'Меню "Постное"',
@@ -208,7 +209,14 @@ window.addEventListener('DOMContentLoaded', () => {
         '.menu .container',
         'menu__item'
     ).render();
-    
+
+    // getResource('http://localhost:3000/menu')
+    //     .then(data => {
+    //         data.forEach(({ img, altimg, title, descr, price }) => {
+    //             new MenuCard(img, altimg, title, descr, price, ".menu .container").render();
+    //         });
+    //     });
+
     // Forms
 
     const forms = document.querySelectorAll('form');
@@ -310,7 +318,7 @@ window.addEventListener('DOMContentLoaded', () => {
         slidesWrapper = document.querySelector('.offer__slider-wrapper'),
         width = window.getComputedStyle(slidesWrapper).width,
         slidesField = document.querySelector('.offer__slider-inner');
-    
+
     if (slides.length < 10) {
         total.textContent = `0${slides.length}`;
         current.textContent = `0${slideIndex}`;
@@ -330,7 +338,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     slider.style.position = 'relative';
-    
+
     const indicators = document.createElement('ol'),
         dots = [];
     indicators.classList.add('carousel-indicators');
@@ -372,7 +380,7 @@ window.addEventListener('DOMContentLoaded', () => {
         indicators.append(dot);
         dots.push(dot);
     }
-    
+
     next.addEventListener('click', () => {
         if (offset == (deleteNotDigits(width) * (slides.length - 1))) {
             offset = 0;
@@ -397,7 +405,7 @@ window.addEventListener('DOMContentLoaded', () => {
         dots.forEach(dot => dot.style.opacity = ".5");
         dots[slideIndex - 1].style.opacity = 1;
     });
-    
+
     prev.addEventListener('click', () => {
         if (offset == 0) {
             offset = deleteNotDigits(width) * (slides.length - 1);
@@ -422,7 +430,7 @@ window.addEventListener('DOMContentLoaded', () => {
         dots.forEach(dot => dot.style.opacity = ".5");
         dots[slideIndex - 1].style.opacity = 1;
     });
-    
+
     dots.forEach(dot => {
         dot.addEventListener('click', (e) => {
             const slideTo = e.target.getAttribute('data-slide-to');
@@ -442,7 +450,7 @@ window.addEventListener('DOMContentLoaded', () => {
             dots[slideIndex - 1].style.opacity = 1;
         });
     });
-    
+
     function deleteNotDigits(str) {
         return +str.replace(/\D/g, '');
     }
